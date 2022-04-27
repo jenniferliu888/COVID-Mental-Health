@@ -7,7 +7,8 @@ output:
   pdf_document: default
   bookdown::pdf_document2: default
 abstract: "Using the national survey about Impacts of COVID-19 on Canadians- Mental Health, by Statistics Canada, this paper aims to find the demographic,social and behavioural factors that negatively impact the mental health of Canadians during COVID-19. It is found that women, younger people, those who are concerned about their own health, concerned about how to coop after COVID and concerned about maintainig social ties are correlated with a bad mental health. Understanding this relationship helps government to make changes that helps mental health problems."
-thanks: 'Code and data are available at: xx '
+thanks: 'Code and data are available at https://github.com/jenniferliu888/COVID-Mental-Health '
+bibliography: bibliography.bib
 
 ---
 \newpage
@@ -17,13 +18,13 @@ library(readxl)
 library(tidyverse)
 library(janitor)
 library(tinytex)
-library(patchwork)
 library(ggplot2)
+library(patchwork)
 ```
 
 ```{r, echo=FALSE, include=FALSE, message=FALSE}
 #load data and select columns 
-data <- read.csv("data.csv")
+data <- read.csv("~/Desktop/starter_folder-main/inputs/data/data.csv")
 data_clean <- data %>%
   select(DEM_10, AGEGR_10, PVISMIN, MH_05, MH_15A,BH_60A, BH_60B, BH_55A, BH_55H, BH_55J, PBH_55L, PLM_30, PIIDFLAG) %>%
   filter(MH_15A < 6 & BH_60A < 6 & PVISMIN < 6 & MH_05 < 6 & BH_60B < 6 & BH_55A < 6 & BH_55H < 6 & BH_55J < 6 & PBH_55L < 6 & PLM_30 < 96)
@@ -36,19 +37,19 @@ data_clean <- rename(data_clean, gender = DEM_10, gender = DEM_10, age_group = A
  
 
 # Introduction
-Research from the World Health Organization shows that the current COVID-19 pandemic has caused a 25% increase in anxiety and depression worldwide and that multiple stress factors are contributing to it. Moreover, it has mentioned that young people and women are the worst hit by this mental burden (source). Therefore, it becomes crucial to examine the factors that are negatively impacting Canadians' mental health during the pandemic. This will help the government to tackle these factors in order to reduce mental health problem as well as providing useful resources to the most vulnerable ones. 
+Research from the World Health Organization shows that the current COVID-19 pandemic has caused a 25% increase in anxiety and depression worldwide and that multiple stress factors are contributing to it. Moreover, it has mentioned that young people and women are the worst hit by this mental burden [@who]. Therefore, it becomes crucial to examine the factors that are negatively impacting Canadians' mental health during the pandemic. This will help the government to tackle these factors in order to reduce mental health problem as well as providing useful resources to the most vulnerable ones. 
 
-Using the 2020 dataset on the impacts of COVID-19 on Canadians' mental health, collected by Statistics Canada, this paper aims to identify the demographics, social and behavioral factors affecting Canadians' mental health. Although past research has shown that Canadians are more and more anxious because of the pandemic (source), specific reasons that are causing it remains uncertain. 
+Using the 2020 dataset on the impacts of COVID-19 on Canadians' mental health, collected by Statistics Canada, this paper aims to identify the demographics, social and behavioral factors affecting Canadians' mental health. Raw data used can be access through the ODESI portal. [@data] Although past research has shown that Canadians are more and more anxious because of the pandemic, specific reasons that are causing it remains uncertain [@mental], which this paper aims to fulfill this gap. 
 
-To analyze the survey, firstly, the original dataset from Statistics Canada was categorized, cleaned and renamed. Secondly, the methodology and collection process of the data source are evaluated. Thirdly, a linear regression and exploratory data analysis (EDA), are used for further exploration in an attempt to find a relationship. Lastly, the result and any possible limitations are discussed. 
+To analyze the survey, firstly, the original dataset from Statistics Canada was categorized, cleaned and renamed. Non-stated response were also removed from it. Secondly, the methodology and collection process of the data source are evaluated. Thirdly, a linear regression and exploratory data analysis (EDA), are used for further exploration in an attempt to find a relationship. Lastly, the result and any possible limitations are discussed. 
 
-It is found that women, younger age people, those who are concerned about their own health, concerned about how to coop after COVID and concerned about maintaining social ties are correlated with a bad mental health. However, the crowdsourcing nature of the survey data might affect the result and makes it unrepresentative of the Canadian population. 
+It is found that women, younger age people, those who are concerned about their own health, concerned about how to coop after COVID and concerned about maintaining social ties are correlated with a bad mental health. Moreover, concern about own health is the factor that correlates with a highest change in perceived mental health.However, the crowdsourcing nature of the survey data might affect the result and makes it unrepresentative of the Canadian population. 
 
 # Data
-This report is analyzed using R [@r], using tidyverse [@tidyverse] and dplyr [@dplyr] packages. All the tables and graphs are created using ggplot2 [@ggplot] and the file is knitted using knitr [@knitr]. The package janitor [@janitor], pdftools[@pdf], purrr[@purrr] are also used.
+This report is analyzed using R [@r], using tidyverse [@tidyverse] and dplyr [@dplyr] packages. All the tables and graphs are created using ggplot2 [@ggplot] and the file is knitted using knitr [@knitr] and patchwork [@patchwork]. 
 
 ## Data Source 
-This report is analyzed using a survey conducted by Statistics Canada, in 2020, called "Crowdsourcing: Impacts of COVID-19 on Canadians-Your Mental Health". It was extracted from the ODESI, which is a data portal for researchers, teachers and students that contains raw data file of multiple Canadians survey of public opinion on social, economic and political issues. (source)
+This report is analyzed using a survey conducted by Statistics Canada, in 2020, called "Crowdsourcing: Impacts of COVID-19 on Canadians-Your Mental Health". It was extracted from the ODESI, which is a data portal for researchers, teachers and students that contains raw data file of multiple Canadians survey of public opinion on social, economic and political issues. [@data]
 
 From April 3, 2020 Statistics Canada has conducted a series of survey in order to assess Canadians' current economic and social situation. during the COVID-19. The survey is used by organizations such as the Public Health Agency of Canada and Employment and Social Development Canada to find people's need and develop support to fulfill these needs. Some subjects that are covered in these surveys include disability, economic accounts, health, income and mental health. The 2020 survey that is used to analyze this report is emphasized on Canadians' mental health. 
 
@@ -68,7 +69,7 @@ Frequency over the last 2 weeks of feeling afraid as if something awful might ha
 \ concern_socialities: Concern about impact of COVID-19 - Maintaining social ties
 \ concern_loosing: Scale that might lose main job or main self-employment income in the next 4 weeks
 
-```{r}
+```{r, echo=FALSE, message=FALSE}
 #data summary 
 summary_mental <- data_clean %>% summarise(
   min = min(perceived_mental_health), Q1 = quantile(perceived_mental_health, 0.25) ,median = median(perceived_mental_health), Q3 = quantile(perceived_mental_health, 0.75), max = max(perceived_mental_health), mean = mean(perceived_mental_health), standarddeviation = sd(perceived_mental_health)
@@ -80,37 +81,34 @@ knitr::kable(summary_mental, caption = "Summary of Respondents' Mental Health")
 
 Respondents perceived mental health ranges from Excellent (1) to Poor (5) with a median at Good (3) and a mean of 2.81. Its standard deviation of 1.05 is rather volatile and would be worth examining the factors contributing to this. 
 
-
 # Result 
 This section looks into factors that affect Canadians' mental health by different variables, such as shopping grocery frequency, different type of concern and age group. This section will draw conclusions between variables by first analyzing with graphs and then linear regression model.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8,fig.height=4}
 bar_mental <- data_clean %>%
-ggplot(aes(x=perceived_mental_health)) + geom_bar() + labs(x='Mental Health', title="Figure 1: Histogram of Respondents' Mental Health")
-
-bar_gender <- data_clean %>%
-mutate(gender = as.factor(gender)) %>%
-ggplot(mapping = aes(x=perceived_mental_health, fill = gender)) + geom_bar(position="dodge") + labs(x='Mental Health', title="Figure 3: Histogram of Respondents' Gender")
-
-bar_grocery <- data_clean %>%
-mutate(shopping_grocery = as.factor(shopping_grocery)) %>%
-ggplot(mapping = aes(x=perceived_mental_health, fill = shopping_grocery))+geom_bar(position="dodge")+labs(x='Grocery Shopping Frequency', title="Figure 4: Histogram of Shopping Frequency")
-
-bar_health <- data_clean %>%
-mutate(concern_ownhealth = as.factor(concern_ownhealth)) %>%
-ggplot(mapping = aes(x=perceived_mental_health, fill = concern_ownhealth))+geom_bar(position="dodge")+labs(x='concern_ownhealth ', title="Figure 5: Histogram of Health Concern")
+ggplot(aes(x=perceived_mental_health, height=20)) + geom_bar() + labs(x='Mental Health', title="Figure 1: Histogram of Respondents' Mental Health")
 
 bar_socialties <- data_clean %>%
 mutate(concern_socialties = as.factor(concern_socialties)) %>%
-ggplot(mapping = aes(x=perceived_mental_health, fill = concern_socialties))+geom_bar(position="dodge")+labs(x='Concern Social Ties', title="Figure 2: Histogram of Social Ties Concern")
+ggplot(mapping = aes(x=perceived_mental_health, height = 50, fill = concern_socialties))+geom_bar(position="dodge")+labs(x='Concern Social Ties', title="Figure 2: Histogram of Social Ties Concern")
 
-bar_violence <- data_clean %>%
-mutate(concern_violence = as.factor(concern_violence)) %>%
-ggplot(mapping = aes(x=perceived_mental_health, fill = concern_violence))+geom_bar(position="dodge")+labs(x='Concern Home Violence', title="Figure 6: Histogram of Home Violence Concern")
+bar_gender <- data_clean %>%
+mutate(gender = as.factor(gender)) %>%
+ggplot(mapping = aes(x=perceived_mental_health, fill = gender, height=100 )) + geom_bar(position="dodge") + labs(x='Mental Health', title="Figure 3: Histogram of Respondents' Gender")
 
-(bar_mental) /
-(bar_socialties | bar_gender) /
-  (bar_grocery | bar_health) 
+bar_grocery <- data_clean %>%
+mutate(shopping_grocery = as.factor(shopping_grocery)) %>%
+ggplot(mapping = aes(x=perceived_mental_health, height = 100, fill = shopping_grocery))+geom_bar(position="dodge")+labs(x='Grocery Shopping Frequency', title="Figure 4: Histogram of Shopping Frequency")
+
+bar_health <- data_clean %>%
+mutate(concern_ownhealth = as.factor(concern_ownhealth)) %>%
+ggplot(mapping = aes(x=perceived_mental_health, height = 200, fill = concern_ownhealth))+geom_bar(position="dodge")+labs(x='Concern Wwn Health ', title="Figure 5: Histogram of Health Concern")
+
+(bar_mental) 
+(bar_socialties) 
+(bar_gender) 
+(bar_grocery) 
+(bar_health)
 
   
 ```
@@ -123,19 +121,19 @@ Figure 5 shows a histogram of respondents' mental health with their concern abou
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 figure_coo <- data_clean %>%
-ggplot(aes(x=concern_coopafter, y=perceived_mental_health))+ labs(x='Concern After COVID', y='Perceived Mental Health', title='Figure 6: Concern Able to Coop after Crisis by Mental Health') + geom_jitter (size=0.25, alpha=.1)
-
+ggplot(aes(x=concern_coopafter, y=perceived_mental_health))+ labs(x='Concern After COVID', y='Perceived Mental Health', title='Figure 6: Concern Able to Coop') + geom_jitter (size=0.25, alpha=.1)
 figure_loosing <- data_clean %>%
-ggplot(aes(x=concern_loosing, y=perceived_mental_health))+ labs(x='Concern Loosing Job', y='Perceived Mental Health', title='Figure 7: Concern Loosing Job by Mental Health') + geom_jitter (size=0.25, alpha=.1)
+ggplot(aes(x=concern_loosing, y=perceived_mental_health))+ labs(x='Concern Loosing Job', y='Perceived Mental Health', title='Figure 7: Concern Loosing Job') + geom_jitter (size=0.25, alpha=.1)
 
 figure_violencce <- data_clean %>%
-ggplot(aes(x=concern_violence, y=perceived_mental_health))+ labs(x='Concern Violence', y='Perceived Mental Health', title='Figure 8: Concern Family Violence by Mental Health') + geom_jitter (size=0.25, alpha=0.1)
+ggplot(aes(x=concern_violence, y=perceived_mental_health))+ labs(x='Concern Violence', y='Perceived Mental Health', title='Figure 8: Concern Family Violence') + geom_jitter (size=0.25, alpha=0.1)
 
 figure_age <- data_clean %>%
-ggplot(aes(x=age_group, y=perceived_mental_health))+ labs(x='Age Group', y='Perceived Mental Health', title='Figure 9: Age Group by Mental Health') + geom_jitter (size=0.25, alpha=0.1)
+ggplot(aes(x=age_group, y=perceived_mental_health))+ labs(x='Age Group', y='Perceived Mental Health', title='Figure 9: Age Group') + geom_jitter (size=0.25, alpha=0.1)
 
 
-(figure_coo | figure_loosing | figure_violencce | figure_age)
+(figure_coo | figure_loosing ) /
+(figure_violencce | figure_age)
 
 ```
 
@@ -144,24 +142,25 @@ Figure 6-9 are scatterplots of 3 other variables and the perceived mental health
 After analyzing graph 1-9, the variables of concern about social ties, concern about their own health, concern to be able to coop after covid, concern of loosing employment and age group are potential factors that are affecting this. 
 
 # Model 
-```{r}
+```{r, echo=FALSE, include=FALSE, message=FALSE}
 model <- lm(perceived_mental_health ~ concern_socialties + concern_ownhealth + concern_coopafter + concern_loosing + age_group, data=data_clean )
 ```
 
-```{r}
+```{r, echo=FALSE, message=FALSE}
+
 res <- rstandard(model)
 y_hat <- fitted(model)
 
 plot(y_hat, res)
 ```
 Although this residual plot does not satisfy the assumption of linearity and independence, the variables has been treated as continuous, while they are discrete. The consequence is that the residual plot appears as a series of parallel lines, as shown in the plot. This makes it more difficult since the points clearly will not be randomly scattered. Therefore, we will also perform a residual QQ plot. 
-```{r}
+```{r, echo=FALSE, message=FALSE}
 qqnorm(res)
 qqline(res)
 ```
 There is room of improvement because the dots are slightly deviated from the 45 degree line, but we will assume that normality is not violated in the model because of the large dataset we have. 
 
-```{r}
+```{r, include=FALSE, message=FALSE}
 summary(model)
 ```
 
@@ -178,14 +177,16 @@ summary(model)
 
 We then constructed a linear regression model for variables selected previously A mathematical model is useful to explain how each variable affects the mental health. In this model, $\beta_1$ represents respondents concern about social ties; $\beta_2$ indicates their concern with their own health; $\beta_3$ is for their concern to coop after COVID; $\beta_4$ indicated concern of loosing employment and $\beta_4$ for the age group. The null hypothesis is that the variable has no correlation with mental health. All p-value are higher than the significance level, which means that the sample data does not provide enough evident to reject the null hypothesis. Thus, all variables are affecting respondents' mental health. The residual standard error is 0.9775, which indicated that 97.75% variation in mental health is explained by the model. 
 
-$Y =\beta_0 +0.116918 X_1 + 0.208381 X_2 + 0.150811 X_3 -0.008973 X_4 -0.162380 X_5  $
+$Y =\beta_0 +0.116918 X_1 + 0.208381 X_2 + 0.150811 X_3 -0.008973 X_4 -0.162380 X_5$
 
-\ Y: Perceived mental health
-\ $X_1$: Concern about social ties
-\ $X_2$: Concern about own health
-\ $X_3$: Concern how to coop after COVID
-\ $X_4$: Concern loosing job 
-\ $X_5$: Age group
+\begin{itemize}
+\item $Y$: Perceived mental health 
+\item $X_1$: Concern about social ties
+\item $X_2$: Concern about own health
+\item $X_3$: Concern how to coop after COVID
+\item $X_4$: Concern loosing job 
+\item $X_5$: Age group
+\end{itemize}
 
 From the coefficients, we can find that concern of social ties, concern of their own health and concern to coop after COVID all have positive correlation with perceived mental health. The more they are concerned about these, their mental health becomes weaker. Concern of loosing the job and age group have negative correlation with the interest variable. Those who are younger have a poorer perceived mental health than the older ones and the less concern a person is about loosing its job, the poorer its mental health is. All correlations are aligned with the previous graphs, except for concern of loosing employment, which had a weak positive relationship. 
 
@@ -200,12 +201,14 @@ A discrepancy between the exploratory graphing data analysis and the linear regr
 
 Mental health is extremely important for Canadians well-being and government can implement concrete changes based on these results to better ease our mental health. For instance, reducing concern about people's own health by creating meaningful marketing campaign will help. Planning out a concrete plans for a smooth recover also reduces Canadians' concern on how to coop after this pandemic. 
 
-From figure 3, we can also see that the proportion of women with more difficult mental health situation is more than men. Further analysis can be done in finding what factors impact Canadians women to have a worse mental health situation during the pandemic than men. Women suffering more than men is an important problem that ought to analyze. A news from CBC on March 11, 2022 also aligned  with this finding. It has reported that 60% of women, from 18 to 34 years old affirms that their mental health had worsened throughout the pandemic, and this number is higher than men's (1). 
+From figure 3, we can also see that the proportion of women with more difficult mental health situation is more than men. Further analysis can be done in finding what factors impact Canadians women to have a worse mental health situation during the pandemic than men. Women suffering more than men is an important problem that ought to analyze. A news from CBC on March 11, 2022 also aligned  with this finding. It has reported that 60% of women, from 18 to 34 years old affirms that their mental health had worsened throughout the pandemic, and this number is higher than men's [@cbc]. 
 
 ## Limitation 
 Multiples issues with this survey should be considered when looking at this paper. To begin, no sampling was done and this survey was only administered on a voluntary basis. The sample of 45,989 respondents might not be representative of the Canadian population. Perhaps, those who exhibit mental health problems has a higher tendency to complete the survey. Moreover, because a major part of the survey promotion has been done through social media, younger people would have a higher response rate than older ones. 
 
 Moreover, respondents are asked to rate their perceived mental health on a scale of 1-5. This is highly biased as someone who considers itself to have a good mental health might be different to someone else and it becomes difficult to make comparison. This is similar for questions where respondents are asked to measure their concern about a certain problem.
+
+\newpage
 
 # Appendix
 
@@ -226,15 +229,15 @@ The data is in the form of survey with only numbers for the data.
 2. *How many instances are there in total (of each type, if appropriate)?*
 NA
 3. *Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a larger set? If the dataset is a sample, then what is the larger set? Is the sample representative of the larger set (for example, geographic coverage)? If so, please describe how this representativeness was validated/verified. If it is not representative of the larger set, please describe why not (for example, to cover a more diverse range of instances, because instances were withheld or unavailable).*
-	- TBD
+	- NA
 4. *What data does each instance consist of? "Raw" data (for example, unprocessed text or images) or features? In either case, please provide a description.*
-	- TBD
+	- only raw data
 5. *Is there a label or target associated with each instance? If so, please provide a description.*
-	- TBD
+	- na
 6. *Is any information missing from individual instances? If so, please provide a description, explaining why this information is missing (for example, because it was unavailable). This does not include intentionally removed information, but might include, for example, redacted text.*
-	- TBD
+	- na
 7. *Are relationships between individual instances made explicit (for example, users' movie ratings, social network links)? If so, please describe how these relationships are made explicit.*
-	- TBD
+	- na
 8. *Are there recommended data splits (for example, training, development/validation, testing)? If so, please provide a description of these splits, explaining the rationale behind them.*
 	- no
 9. *Are there any errors, sources of noise, or redundancies in the dataset? If so, please provide a description.*
@@ -346,7 +349,6 @@ NA
 \newpage
 
 # Reference 
-https://www.cbc.ca/news/health/canada-mental-health-crisis-covid-19-pandemic-1.6382378#:~:text=Fifty%2Dseven%20per%20cent%20of,health%20implications%20for%20some%20Canadians. (1)
 
 
 
